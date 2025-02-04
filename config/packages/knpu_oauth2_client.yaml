@@ -1,0 +1,10 @@
+knpu_oauth2_client:
+  # clients:
+  #   keycloak:
+  #     type: keycloak # Type de fournisseur Keycloak
+  #     client_id: classbridge-backend #'%env(KEYCLOAK_CLIENT_ID)%'
+  #     client_secret: KvYXsKtzqv1jm91nJCoc8VhJqKLKsbY7 #'%env(KEYCLOAK_CLIENT_SECRET)%'
+  #     redirect_route: api_login_check_keyckloak # Redirection après l'authentification
+  #     auth_server_url: http://localhost:8080 #'%env(resolve:KEYCLOAK_URI)%'  # URL du serveur Keycloak
+  #     realm: classbridge #'%env(KEYCLOAK_REALM)%'  # Nom du realm dans Keycloak
+  #     use_state: true # Option pour utiliser un state lors de l'authentification

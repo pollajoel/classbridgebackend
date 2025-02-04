@@ -1,0 +1,14 @@
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
+
+auth:
+  path: /auth
+  methods: ['POST']
+
+# api/config/routes.yaml
+api_graphql_entrypoint:
+  path: /api/graphql
+  controller: api_platform.graphql.action.entrypoint

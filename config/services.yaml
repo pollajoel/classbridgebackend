@@ -1,0 +1,43 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    app.email                 :  '%env(resolve:APP_EMAIL)%'
+    app.keycloak.keycloakUri  :  '%env(resolve:KEYCLOAK_URI)%'
+    app.keycloak.realm        :  '%env(resolve:KEYCLOAK_REALM)%'
+    app.keycloak.clientId     :  '%env(resolve:KEYCLOAK_CLIENT_ID)%'
+    app.keycloak.clientSecret :  '%env(resolve:KEYCLOAK_CLIENT_SECRET)%'
+    keycloak.publicKey        :  '%env(resolve:KEYCLOAK_PUBLIC_KEY)%'
+    # Add your own parameters here...
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+    App\State\UserProcessorPost:
+        bind:
+            $processor: '@api_platform.doctrine.orm.state.persist_processor'
+    app.keycloak_provider:
+        class: App\Security\User\KeycloakBearerUserProvider
+    # # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones  
+    # Déclarez votre authentificateur personnalisé
+    # Enregistrez votre propre authentificateur Keycloak
+    # app.custom_authenticator:
+    #     class: App\Security\Authenticator\KeycloakAuthenticator
+    #     arguments:
+    #         #$jwtManager: '@lexik_jwt_authentication.jwt_manager'
+    #         $userRepository: '@App\Repository\UserRepository'
+    #     autowire: true

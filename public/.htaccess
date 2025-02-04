@@ -1,0 +1,11 @@
+# .htaccess pour Symfony
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Si l'URL est déjà un fichier ou un répertoire valide, Apache l'acceptera
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Redirige toutes les autres requêtes vers le front controller index.php
+    RewriteRule ^(.*)$ /index.php [QSA,L]
+</IfModule>

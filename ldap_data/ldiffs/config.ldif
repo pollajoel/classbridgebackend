@@ -1,0 +1,93 @@
+# Fichier LDIF avec des rôles mappés à partir des groupes LDAP
+
+# Étudiant 1
+dn: uid=john.doe,ou=students,dc=example,dc=org
+objectClass: top
+objectClass: person
+objectClass: inetOrgPerson
+uid: john.doe
+cn: John Doe
+sn: Doe
+givenName: John
+mail: john.doe@example.com
+userPassword: {SSHA}abcdefghijklmnpqrstuvwxyz123456
+ou: students
+telephoneNumber: +1234567890
+studentID: 12345
+program: Computer Science
+memberOf: cn=students,ou=groups,dc=example,dc=org  # Appartient au groupe "students"
+
+# Étudiant 2
+dn: uid=jane.smith,ou=students,dc=example,dc=org
+objectClass: top
+objectClass: person
+objectClass: inetOrgPerson
+uid: jane.smith
+cn: Jane Smith
+sn: Smith
+givenName: Jane
+mail: jane.smith@example.com
+userPassword: {SSHA}mnopqrstuvwxzabcdefghijklmno
+ou: students
+telephoneNumber: +0987654321
+studentID: 12346
+program: Mathematics
+memberOf: cn=students,ou=groups,dc=example,dc=org  # Appartient au groupe "students"
+
+# Enseignant 1
+dn: uid=alice.jones,ou=teachers,dc=example,dc=org
+objectClass: top
+objectClass: person
+objectClass: inetOrgPerson
+uid: alice.jones
+cn: Alice Jones
+sn: Jones
+givenName: Alice
+mail: alice.jones@example.com
+userPassword: {SSHA}qwertyuiopasdfghjklmnbvcxz1234
+ou: teachers
+telephoneNumber: +1122334455
+title: Professor
+department: Computer Science
+memberOf: cn=teachers,ou=groups,dc=example,dc=org  # Appartient au groupe "teachers"
+
+# Enseignant 2
+dn: uid=bob.brown,ou=teachers,dc=example,dc=org
+objectClass: top
+objectClass: person
+objectClass: inetOrgPerson
+uid: bob.brown
+cn: Bob Brown
+sn: Brown
+givenName: Bob
+mail: bob.brown@example.com
+userPassword: {SSHA}lmnopqrsxyzabcdefg12345
+ou: teachers
+telephoneNumber: +9988776655
+title: Lecturer
+department: Mathematics
+memberOf: cn=teachers,ou=groups,dc=example,dc=org  # Appartient au groupe "teachers"
+
+
+# Groupe d'étudiants
+dn: cn=students,ou=groups,dc=example,dc=org
+objectClass: top
+objectClass: groupOfNames
+cn: students
+member: uid=john.doe,ou=students,dc=example,dc=org
+member: uid=jane.smith,ou=students,dc=example,dc=org
+
+# Groupe d'enseignants
+dn: cn=teachers,ou=groups,dc=example,dc=org
+objectClass: top
+objectClass: groupOfNames
+cn: teachers
+member: uid=alice.jones,ou=teachers,dc=example,dc=org
+member: uid=bob.brown,ou=teachers,dc=example,dc=org
+
+# Groupe d'administrateurs
+dn: cn=admins,ou=groups,dc=example,dc=org
+objectClass: top
+objectClass: groupOfNames
+cn: admins
+member: uid=admin,ou=admins,dc=example,dc=org

@@ -1,0 +1,10 @@
+hwi_oauth:
+    # https://github.com/hwi/HWIOAuthBundle/blob/master/docs/2-configuring_resource_owners.md
+    resource_owners:
+        keycloak:
+            type:                keycloak
+            base_url:            "http://localhost:8080"
+            realm:               "classbridge"
+            client_id:           "classbridge-backend"
+            client_secret:       "KvYXsKtzqv1jm91nJCoc8VhJqKLKsbY7"
+            scope:               "email profile roles"

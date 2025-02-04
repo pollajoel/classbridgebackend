@@ -1,0 +1,307 @@
+# Comments are provided throughout this file to help you get started.
+# If you need more help, visit the Docker Compose reference guide at
+# https://docs.docker.com/go/compose-spec-reference/
+
+# Here the instructions define your application as a service called "server".
+# This service is built from the Dockerfile in the current directory.
+# You can add other services your application may depend on here, such as a
+# database or a cache. For examples, see the Awesome Compose repository:
+# https://github.com/docker/awesome-compose
+services:
+
+
+  frontend:
+    working_dir: /app
+    build:
+      context: ../frontend/react-typescript
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ../frontend/react-typescript:/app
+      - /app/node_modules
+    networks:
+      - frontend_network
+      - keycloak-net
+
+  server:
+    container_name: classbridge_container
+    build:
+      context: .
+    networks:
+      - classbridge_network
+      - web
+      - keycloak-net
+    depends_on:
+      - database
+      - smtp4dev
+      - keycloak
+    # dns:
+    #   - 8.8.8.8  # Google DNS
+    labels:
+      - "traefik.http.routers.myapp.rule=Host(`classbridge.test.local`)"
+      - "traefik.http.services.myapp.loadbalancer.server.port=80"
+    environment:
+      - APP_ENV=dev  # Set your application environment here
+      - DATABASE_URL=postgresql://app:!ChangeMe!@database:5432/app_classbridgedb
+      - JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.key
+      - JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.key
+      - JWT_PASSPHRASE=902aec897e0c66f8031d25d38e1c9377661cde4df49fdc3204f83998beb7cda6
+      - MAILER_DSN=smtp://smtp4dev:25
+      - MESSENGER_TRANSPORT_DSN=amqp://guest:guest@rabbitmq:5672/%2f/messages
+      - KEYCLOAK_URI=http://keycloak:8080
+      - KEYCLOAK_REALM=classbridge
+      - KEYCLOAK_CLIENT_ID=classbridge-backend
+      - KEYCLOAK_CLIENT_SECRET=QXXNwe4EXGen7FbTZyxm4ggwjBmDn6Jt
+      #- KEYCLOAK_PUBLIC_KEY="MIICpTCCAY0CBgGUitNCtTANBgkqhkiG9w0BAQsFADAWMRQwEgYDVQQDDAtjbGFzc2JyaWRnZTAeFw0yNTAxMjEyMTQzMDhaFw0zNTAxMjEyMTQ0NDhaMBYxFDASBgNVBAMMC2NsYXNzYnJpZGdlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyb/Z2Cbts+goyL7BHM9L/CjBANRBdr3m8UtXsOV0/rawYdvHTE9XDWgvWBay3DE7GfdK80jWgI4bobN6TtLxAYLABpFKrtQ/QA61mXRwKSoYW65oW5Obpcu06QUZlRPoYPGiCQQ78WLQYltgsl6/LDPYrFmhMRpt7rcVbGuM8s7wZOaj34MV6/eWOnHnLgtt9phl2TF25ejAiT3nToC7SmuxF+NS1zSFDfcV/w3vzfEqFKQzL1mxe63lffLg1AcEeD/N+wG6srsdOAYSBfGBsRvReHr0+OlTIZsXv5yKmwkF6asqgMkxWbI7uPJESzZwIOiumTW3SzZp8HFlRdu5NwIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQAPXZfowyBL3EYOJ2Ubeh+4+MHhng3xZgZeFiRdOtIooVpJcP0i2WvSOvtDV1JJYLfasn+LVTi9H64yadqnkASqaMj+mGibrfVl4dL/0RYSI4OaBfiVfVKJGC+cK5rsht1ogFe2spquSCdvME1z4eLBUY4YDB/D8JDiAOAAnBfcguCMZTpDT71qEEwAF5dSVrWTg60/yblYJtDabqjg44++rBAj5dyAS4WomupJmgY16zVp98Q/yDhkZQJzrjSfkW8d2GBnbypMYxgKnsUMEcjvUWNItfAx9L0AuKnMpq9Lm1DpTy/LelIL1AXI1gyUlhUFovx5EK1ra9oaXXWz9L8/"
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "80"
+      - 80:9000
+
+# CronJob #################
+  cronjob:
+    container_name: classbridge_crojonb
+    build:
+      context: .
+    networks:
+      - classbridge_network
+      - web
+      - keycloak-net
+    depends_on:
+      - database
+      - smtp4dev
+    dns:
+      - 8.8.8.8  # Google DNS
+    labels:
+      - "traefik.http.routers.myapp.rule=Host(`classbridge.test.local`)"
+      - "traefik.http.services.myapp.loadbalancer.server.port=80"
+    environment:
+      - APP_ENV=dev  # Set your application environment here
+      - DATABASE_URL=postgresql://app:!ChangeMe!@database:5432/app_cronjob
+      - JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.key
+      - JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.key
+      - JWT_PASSPHRASE=902aec897e0c66f8031d25d38e1c9377661cde4df49fdc3204f83998beb7cda6
+      - MAILER_DSN=smtp://smtp4dev:25
+      - MESSENGER_TRANSPORT_DSN=amqp://guest:guest@rabbitmq:5672/%2f/messages
+      - KEYCLOAK_URI=http://keycloak:8080
+      - KEYCLOAK_REALM=classbridge
+      - KEYCLOAK_CLIENT_ID=classbridge-backend
+      - KEYCLOAK_CLIENT_SECRET=QXXNwe4EXGen7FbTZyxm4ggwjBmDn6Jt
+    volumes:
+      - ../classBridge-cronjob/:/var/www/html
+    ports:
+      - 9001:80
+    command: "php /var/www/html/bin/console messenger:consume async -vv --time-limit=3600"
+
+## RabbitMQ service
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    container_name: rabbitmq
+    ports:
+      - "15672:15672"  # Port pour le management plugin (web UI)
+      - "5672:5672"    # Port pour la communication avec l'application
+    networks:
+      - classbridge_network
+      - rabbitmq_network
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest  # Utilisateur par défaut
+      - RABBITMQ_DEFAULT_PASS=guest  # Mot de passe par défaut=value
+
+  database:
+    container_name:  database
+    image: postgres:${POSTGRES_VERSION:-16}-alpine
+    environment:
+      ALLOW_EMPTY_PASSWORD: yes
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      # You should definitely change the password in production
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+    volumes:
+      - database_data:/var/lib/postgresql/data:rw
+    ports:
+      - 5432:5432
+    networks:
+      - classbridge_network
+      - keycloak-net
+    labels:
+      - "traefik.http.routers.myapp.rule=Host(`postgres.database.local`)"
+
+  pgAdmin:
+    container_name: pgAdmin
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=app@mailer.com
+      - PGADMIN_DEFAULT_PASSWORD=!ChangeMe!
+    ports:
+      - "80" # Expose le port 80
+    networks:
+      - db_network
+      - classbridge_network
+    depends_on:
+      - database
+    labels:
+      - "traefik.http.routers.myapp.rule=Host(`pgadmin.local.test`)"
+      - "traefik.http.services.myapp.loadbalancer.server.port=80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin  # Monter un volume pour persister les données
+###< doctrine/doctrine-bundle ###
+
+  smtp4dev:
+    image: rnwood/smtp4dev
+    container_name: smtp4dev
+    restart: always
+    ports:
+      # Change the number before : to the port the web interface should be accessible on
+      - '5001:80'
+      # Change the number before : to the port the SMTP server should be accessible on
+      - '25:25'
+      # Change the number before : to the port the IMAP server should be accessible on
+      # - '143:143'
+    volumes:
+      # This is where smtp4dev stores the database..
+      - smtp4dev-data:/smtp4dev
+    labels:
+      - "traefik.http.routers.myapp.rule=Host(`smtp.local.test`)"
+    environment:
+      # Uncomment to customise these settings
+      # This is not a complete list of the available settings.
+      # See the documentation in appsettings.json for a full list
+      #Specifies the virtual path from web server root where SMTP4DEV web interface will be hosted. e.g. "/" or "/smtp4dev"
+      #- ServerOptions__BasePath=/smtp4dev
+
+      #Specifies the URLs the web UI will use inside the container.
+      - ServerOptions__Urls=http://*:80
+      - Smtp4dev_Verbose=true 
+      #Specifies the server hostname. Used in auto-generated TLS certificate if enabled.
+      - ServerOptions__HostName=smtp4dev
+    networks:
+      - classbridge_network
+      - web
+      - keycloak-net
+
+
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:${KC_VERSION}
+    command: ["start-dev", "--import-realm"]
+    restart: unless-stopped
+    environment:
+      KC_DB: postgres
+      KC_DB_USERNAME: ${POSTGRES_USER:-app}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
+      KC_DB_URL: "jdbc:postgresql://database:5432/keycloak"
+      KC_METRICS_ENABLED: true
+      KC_LOG_LEVEL: ${KC_LOG_LEVEL}
+      KC_REALM_NAME: ${KC_REALM_NAME}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+    ports:
+      - ${KC_PORT}:8080
+    volumes:
+      - ./keycloak/realm.json:/opt/keycloak/data/import/realm.json:ro
+    #logging: *logging
+    networks:
+      - keycloak-net
+      - ldap_network
+  
+  proxy_server:
+    image: nginx:latest
+    container_name: proxy_server
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../NGINX/conf.d:/etc/nginx/conf.d
+      - ../NGINX/ssl/certificate.crt:/etc/nginx/ssl/certificate.crt #/etc/nginx/ssl/certificate.crt
+    depends_on:
+      - keycloak
+      - elasticsearch
+      - kibana
+      - pgAdmin
+      - rabbitmq
+      - frontend
+    networks:
+      - keycloak-net
+      - classbridge_network
+      - elasticsearch_network
+      - db_network
+      - rabbitmq_network
+      - frontend_network
+  # mkdir -p ssl openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ssl/private.key -out ssl/certificate.crt
+
+
+  openldap:
+    container_name: openldap
+    image: bitnami/openldap:2
+    ports:
+      - '1389:1389'
+      - '1636:1636'
+    environment:
+      - LDAP_ADMIN_USERNAME=admin
+      - LDAP_ADMIN_PASSWORD=adminpassword
+      - LDAP_USERS=user01,user02
+      - LDAP_PASSWORDS=password1,password2
+      - LDAP_ADMIN_DN=cn=admin,dc=example,dc=org
+    networks:
+      - ldap_network
+    volumes:
+      - 'openldap_data:/bitnami/openldap'
+      - './ldap_data/ldiffs:/var/ldiffs'
+  
+  elasticsearch:
+  # https://hub.docker.com/r/bitnami/elasticsearch
+    container_name: elasticsearch
+    image: 'bitnami/elasticsearch:latest'
+    networks:
+      - classbridge_network
+      - elasticsearch_network
+    ports:
+      - 9200:9200
+      - 9300:9300
+  kibana:
+  # https://hub.docker.com/r/bitnami/kibana
+    image:  bitnami/kibana:latest
+    container_name: kibana
+    environment:
+      - KIBANA_ELASTICSEARCH_URL=http://elasticsearch
+      - KIBANA_ELASTICSEARCH_PORT_NUMBER=9200
+      - KIBANA_PASSWORD=${KIBANA_PASSWORD:- changeme}
+    ports:
+      - 5601:5601
+    networks:
+      - elasticsearch_network
+    depends_on:
+      - elasticsearch
+    
+networks:
+  elastic:
+  classbridge_network:
+    driver: bridge
+  web:
+    external: true
+  keycloak-net:
+    driver: bridge
+  ldap_network:
+    driver: bridge
+  elasticsearch_network:
+    driver: bridge
+  db_network:
+    driver: bridge
+  rabbitmq_network:
+    driver: bridge
+  frontend_network:
+    driver: bridge
+
+volumes:
+  ###> doctrine/doctrine-bundle ###
+  database_data:
+###< doctrine/doctrine-bundle ###
+  pgadmin_data:
+  smtp4dev-data:
+  keycloak-data:
+  ldap_data:
+  ldap_config:
+  openldap_data:
+    driver: local

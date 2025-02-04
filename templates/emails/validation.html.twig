@@ -1,0 +1,8 @@
+{# templates/emails/signup.html.twig #}
+
+<h1>Welcome {{ email.toName }}!</h1>
+<p><span>{{ email.to[0].address }}</span></p>
+<p>
+    <a href="http://classbridge.test.local:9000/validate-account?token=validation.code"> Activate your account</a>
+    (ce lien est valide jusqu'au {{ validation.expiredAt |date('F jS') }})
+</p>
