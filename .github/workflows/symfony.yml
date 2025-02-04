@@ -38,3 +38,10 @@ jobs:
       run: | 
         vendor/bin/phpstan analyse --level 9 --no-progress
       continue-on-error: false
+    
+    - name: Fail on error
+      run: |
+        if [ $? -ne 0 ]; then
+          echo "Tests failed. Blocking merge."
+          exit 1
+        fi
