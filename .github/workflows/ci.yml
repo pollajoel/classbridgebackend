@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-
+    name: build project and test
     runs-on: ubuntu-latest # L'environnement d'exécution est Ubuntu
 
     steps:
