@@ -22,5 +22,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4 # Action pour installer composer
 
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress
+
+    - name: Run PHPStan
+      run: vendor/bin/phpstan analyse --level 9 --no-progress
