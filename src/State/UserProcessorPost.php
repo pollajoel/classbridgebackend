@@ -47,10 +47,6 @@ final readonly class UserProcessorPost implements ProcessorInterface
         $hashedPassword = $this->userService->hashPassword($data);
         $data->setPassword($hashedPassword);
         $data->eraseCredentials();
-        /**
-         * Validate user role, before attaching them to user.
-         */ 
-        $userRoles = $this->userService->userRoleValidate($data);
         try{
            /**
             *  @var AccountValidation $validation
@@ -70,6 +66,7 @@ final readonly class UserProcessorPost implements ProcessorInterface
         }catch(Exception $e){
             throw new Exception($e->getMessage()); 
         }
+        /** @var User $result */
         $result = $this->processor->process($data, $operation, $uriVariables, $context);
         return $result;
     }
