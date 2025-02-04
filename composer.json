@@ -100,8 +100,12 @@
         "hwi/oauth-bundle": "*",
         "phpstan/phpstan": "*",
         "phpstan/phpstan-strict-rules": "*",
+        "phpunit/phpunit": "^11.5",
         "psalm/phar": "*",
+        "symfony/browser-kit": "7.2.*",
+        "symfony/css-selector": "7.2.*",
         "symfony/maker-bundle": "^1.62",
+        "symfony/phpunit-bridge": "^7.2",
         "symfony/stopwatch": "7.2.*",
         "symfony/web-profiler-bundle": "7.2.*"
     }

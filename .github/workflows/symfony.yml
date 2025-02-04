@@ -25,5 +25,8 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
 
+    - name: Run PHPUnit
+      run: vendor/bin/phpunit --coverage-text --coverage-clover coverage.clover
+  
     - name: Run PHPStan
       run: vendor/bin/phpstan analyse --level 9 --no-progress
