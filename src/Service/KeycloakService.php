@@ -28,7 +28,7 @@ class KeycloakService
     // http://localhost:8080/realms/classbridge/protocol/openid-connect/userinfo
 
     public function __construct(
-        private readonly HttpService $httpService,
+        private HttpService $httpService,
         private LoggerInterface $logger,
         private ParameterBagInterface $params
     ) {}
@@ -52,7 +52,7 @@ class KeycloakService
             'client_id'      => $clientId,
             'client_secret'  => $clientSecret
         ];
-    
+
         try {
             // Envoi de la requête pour obtenir un token
             $response = $this->httpService->postData($url, [
@@ -364,11 +364,11 @@ class KeycloakService
         $realm        = $this->params->get("app.keycloak.realm");
         $keycloakHost = "http://keycloak.example.com";                   #$this->params->get("app.keycloak.keycloakUri");
         $url          = $keycloakHost . str_replace('realm__name', $realm, self::USER_INFO);
-        $options = [ "auth_bearer" => $token ];
+        $options = ["auth_bearer" => $token];
 
         try {
             $response = $this->httpService->postData($url, $options);
-            dd( $url, $response->getStatusCode());
+            dd($url, $response->getStatusCode());
 
             if ($response->getStatusCode() === 200) {
                 $data = $response->toArray();

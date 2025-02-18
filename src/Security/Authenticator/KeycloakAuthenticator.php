@@ -26,12 +26,12 @@ class KeycloakAuthenticator extends AbstractAuthenticator
 {
 
 
-    public function __construct(private readonly UserRepository $userRepository,
-    private ParameterBagInterface $params,
-    private JWTTokenManagerInterface $jwtManager,
-    private readonly UserService $userService
-    )
-    {}
+    public function __construct(
+        private UserRepository $userRepository,
+        private ParameterBagInterface $params,
+        private JWTTokenManagerInterface $jwtManager,
+        private UserService $userService
+    ) {}
     /**
      * @param string $token
      * @return string
@@ -62,8 +62,8 @@ class KeycloakAuthenticator extends AbstractAuthenticator
 
         try {
             // Décodez le jeton JWT
-            $decodeToken = $this->formatToken($token); 
-            $data = $this->jwtManager-> parse($decodeToken);
+            $decodeToken = $this->formatToken($token);
+            $data = $this->jwtManager->parse($decodeToken);
         } catch (\Symfony\Component\Security\Core\Exception\AuthenticationException $e) {
             throw new AuthenticationException($e->getMessage());
         }
@@ -80,8 +80,8 @@ class KeycloakAuthenticator extends AbstractAuthenticator
             throw new NotFoundException(sprintf("%s with email '%s' does not exist", $reposType, $email));
         }
 
-       $data->setLastLogin(new DateTimeImmutable());
-       $this->userService->saveUser($data);
+        $data->setLastLogin(new DateTimeImmutable());
+        $this->userService->saveUser($data);
 
         return new SelfValidatingPassport(new UserBadge($username, null, ["roles" => $roles, "email" => $email, "data" => $data]));
     }
@@ -104,7 +104,4 @@ class KeycloakAuthenticator extends AbstractAuthenticator
 
         return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
     }
-
-
-    
 }

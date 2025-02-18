@@ -17,9 +17,9 @@ class AccountValidationService
 
     const VALIDATION_CODE_PREFIX = 'ValidationCode#__';
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly LoggerInterface $logger,
-        private readonly MailerService $message
+        private EntityManagerInterface $entityManager,
+        private LoggerInterface $logger,
+        private MailerService $message
     ) {}
 
 

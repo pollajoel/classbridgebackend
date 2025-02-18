@@ -28,17 +28,15 @@ final readonly class UserProcessorPost implements ProcessorInterface
         private UserPasswordHasherInterface $passwordHasher,
         private MailerService $mailerService,
         private AccountValidationService $accountValidationService,
-        private readonly UserService $userService,
-        private readonly KeycloakService $keycloakService,
+        private UserService $userService,
+        private KeycloakService $keycloakService,
         private MessageBusInterface $bus
-    )
-    {
-    }
+    ) {}
 
     /**
      * @param User | ParentEntity | TeacherEntity | StudentEntity  $data
      */
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []):mixed
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
     {
         if (!$data->getPlainPassword()) {
             return $this->processor->process($data, $operation, $uriVariables, $context);
@@ -51,28 +49,26 @@ final readonly class UserProcessorPost implements ProcessorInterface
         $hashedPassword = $this->userService->hashPassword($data);
         $data->setPassword($hashedPassword);
         $data->eraseCredentials();
-        try{
-           /**
-            *  @var AccountValidation $validation
-            */
+        try {
+            /**
+             *  @var AccountValidation $validation
+             */
             $accountValidation = $this->accountValidationService->attachValidattionToUser($data);
             # créer new validation for User.
-            $data->addAccountsValidation( $accountValidation );
-        }catch( Exception $e ){
+            $data->addAccountsValidation($accountValidation);
+        } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
-       
-        try{
+
+        try {
             $this->mailerService->sendValidationEmail($data, $accountValidation);
             # création de l'utilisateur
             $this->userService->createUserOnKeycloak($data);
-
-        }catch(Exception $e){
-            throw new Exception($e->getMessage()); 
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
         }
         /** @var User $result */
         $result = $this->processor->process($data, $operation, $uriVariables, $context);
         return $result;
     }
-
 }

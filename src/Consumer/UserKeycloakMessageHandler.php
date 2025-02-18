@@ -13,8 +13,8 @@ class UserKeycloakMessageHandler
 {
 
     public function __construct(
-        private readonly KeycloakService $keycloakService,
-        private readonly LoggerInterface $loggerInterface
+        private  KeycloakService $keycloakService,
+        private LoggerInterface $loggerInterface
     ) {}
 
     public function __invoke(UserKeycloakMessage $user)

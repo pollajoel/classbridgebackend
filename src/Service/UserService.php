@@ -25,7 +25,7 @@ class UserService
         private UserPasswordHasherInterface $passwordHasher,
         private KeycloakService $keycloakService,
         private MessageBusInterface $bus,
-        private readonly UserRepository $userRepository,
+        private UserRepository $userRepository,
         private EntityManagerInterface $entityManager
     ) {}
 
@@ -152,7 +152,8 @@ class UserService
     }
 
 
-    public function saveUser(User | ParentEntity | TeacherEntity | StudentEntity $user): object{
+    public function saveUser(User | ParentEntity | TeacherEntity | StudentEntity $user): object
+    {
         $this->entityManager->persist($user);
         $this->entityManager->flush();
         return $user;
