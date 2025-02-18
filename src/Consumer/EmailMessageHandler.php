@@ -14,20 +14,20 @@ class EmailMessageHandler {
     
     public function __construct(private MailerInterface $mailer){}
 
-    public function __invoke(EmailMessage $email):void
+    public function __invoke(EmailMessage $emailMessage):void
     {
        
         $email = (new TemplatedEmail())
-        ->from($email->getFrom())
-        ->to(new Address( $email->getTo()->getEmail()) )
-        ->subject($email->getSubject())
+        ->from($emailMessage->getFrom())
+        ->to(new Address( $emailMessage->getTo()->getEmail()) )
+        ->subject($emailMessage->getSubject())
         //->cc('cc@example.com')
         //->bcc('bcc@example.com')
         //->replyTo('fabien@example.com')
         //->priority(Email::PRIORITY_HIGH)
         ->htmlTemplate("emails/validation.html.twig")
         ->locale('fr-FR')
-        ->context($email->getContext());
+        ->context($emailMessage->getContext());
         // Envoyer l'email
         $this->mailer->send($email);
         
