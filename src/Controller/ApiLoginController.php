@@ -13,16 +13,15 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use App\Service\KeycloakService;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+
 
 #[AsController]
 #[ApiResource()]
   class ApiLoginController extends AbstractController
   {
 
-   public function __construct(private KeycloakService $keycloakService, private ParameterBagInterface $parameterBagInterface)
+   public function __construct(private KeycloakService $keycloakService)
    {
       
    }

@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\ParentEntity;
 use App\Entity\User;
 use App\Service\AccountValidationService;
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,17 +27,14 @@ class UserController extends AbstractController
 {
 
 
-    private $client;
+
 
     public function __construct(
         private AccountValidationService $accountValidationService,
-        private EntityManagerInterface $entityManager,
         private MessageBusInterface $bus,
         private LoggerInterface $loggerInterface,
         private KeycloakService $keycloakService
-    ) {
-        $this->client = new Client();
-    }
+    ) {}
 
     #[Route('/validate-account/{token}', name: 'app_user_valiate_account', methods: ['GET'])]
     public function validateUserAccount(UserService $userService, string $token): Response
@@ -49,9 +45,8 @@ class UserController extends AbstractController
             $user = $this->accountValidationService->validateAccount($token);
             // Send user to keycloak for asynchronous handler.
         } catch (Exception $e) {
-
-            return new Response($e->getMessage(), 400);
             $this->loggerInterface->error($e->getMessage());
+            return new Response($e->getMessage(), 400);
         }
 
         if ($user != null) {
