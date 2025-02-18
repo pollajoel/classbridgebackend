@@ -7,3 +7,6 @@ api.install.dependencies:
 	@docker compose exec server composer require ${args}
 api.check.code.quality:
 	@docker compose exec vendor/bin/phpstan analyse
+php.unit.test:
+#--coverage-html public/test-coverage
+	@docker XDEBUG_MODE=coverage vendor/bin/phpunit  

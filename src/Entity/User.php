@@ -3,6 +3,15 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+
+use App\Enums\UserType;
+use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
@@ -13,46 +22,66 @@ use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Put;
-use App\Enums\UserType;
-use App\Repository\UserRepository;
+use App\Controller\UserController;
+use App\GraphQL\Type\UserUnionType;
+use App\Resolver\UserResolver;
 use App\State\UserProcessorPost;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ApiResource(
-    #security:"isAuthenticated",
-    //normalizationContext: ['groups' => ['user:read']],
+    //security:"is_authenticated()",
+    normalizationContext: ['groups' => ['user:read']],
+    securityMessage: 'You are not authenticated',
     //denormalizationContext: ['groups' => ['user', 'user:write']],
     # Restfull api operations
     operations:[
         new GetCollection(
-            // security: 'is_granted("ROLE_ADMIN")',
-            // securityMessage: 'Only admins can manage users'
+            security: 'is_granted("ROLE_ADMIN")',
         ),
         new Post(
             processor: UserProcessorPost::class,
             security : 'is_granted("ROLE_ADMIN")',
-            securityMessage: 'Only admins can create new user.'
+            securityMessage: 'Only admins can create new user.',
+            status: Response::HTTP_CREATED
         ),
         new Put(
-            security: 'is_granted("ROLE_ADMIN", object)',
-            securityMessage: 'You are not allow to to update user'
+            security: 'is_granted("ROLE_ADMIN", object) or is_granted("ROLE_PARENT)',
+            securityMessage: 'You are not allow to to update user',
+            status: Response::HTTP_OK
         ),
         new Patch(),
         new Get(),
+        new Get(
+            uriTemplate:"/user/getMe", 
+            read : false, #signifie que l'opération ne lira pas directement les données de la base de données ou de la ressource.
+            output : [ User::class | ParentEntity::class | StudentEntity::class, TeacherEntity::class], #empêche API Platform de gérer automatiquement la sérialisation de la ressource, car nous souhaitons gérer la réponse avec notre propre logique.
+            security:'is_authenticated()',
+            controller: UserController::class,
+            status: Response::HTTP_OK
+        )
     ],
     graphQlOperations: [
         new Query(),
-        new QueryCollection(),
-        new Mutation(name: 'create'),
-        new Mutation(name: 'update'),
-        new DeleteMutation(name: 'delete'),   
+        new Query(
+            name:"getMe",
+            read:false,
+            output : UserUnionType::class,
+            resolver: UserResolver::class,
+            security: 'is_authenticated()',
+            args: [],
+        ),
+        new QueryCollection(
+            security:' is_granted("ROLE_ADMIN") '
+        ),
+        new Mutation(
+            name: 'create',  
+            security:' is_granted("ROLE_ADMIN") '
+        ),
+        new DeleteMutation(
+            name: 'delete',  
+            security:' is_granted("ROLE_ADMIN") '
+        ),   
     ]
 )]
 #[ORM\InheritanceType("SINGLE_TABLE")]
@@ -65,46 +94,59 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue("IDENTITY")]
     #[ORM\Column(type: 'integer')]
+    #[Groups("user:read")]
     protected ?int $id = null;
+
+    #[Groups("user:read")]
     #[ORM\Column(length: 255, type:'string')]
     protected ?string $username = null;
 
-    //#[Groups("user:read")]
+    #[Groups("user:read")]
     #[ORM\Column(length: 255, type:'string')]
     protected ?string $name = null;
 
-    //#[Groups("user:read")]
+    #[Groups("user:read")]
     #[ORM\Column(length: 255, type:'string')]
     protected ?string $firstname = null;
     
-    //#[Groups("user:read")]
+    #[Groups("user:read")]
     #[Assert\NotNull, Assert\Email()]
     #[ORM\Column(length: 255, unique:true, type:"string")]
     protected ?string $email;
     
-    //#[Groups("user:read")]
+    #[Groups("user:read")]
     #[ORM\Column(type: 'json')]
     protected array $roles = [];
 
-    //#[Groups("user:read")]
+    #[Groups("user:read")]
     #[Assert\NotBlank]
     #[ORM\Column(length: 255, type: 'string')]
     protected ?string $password;
+
+    #[Groups("user:read")]
     #[Assert\NotBlank]
     protected ?string $plainPassword = null;
-
     /**
      * @var Collection<int, AccountValidation>
      */
+    #[Groups("user:read")]
     #[ORM\OneToMany(targetEntity: AccountValidation::class, mappedBy: 'relateduservalidation')]
     protected Collection $accountsValidations;
 
+    #[Groups("user:read")]
     #[ORM\Column(nullable: true)]
     protected ?bool $isActive = null;
+    
+    #[Groups("user:read")]
+    protected string $discriminator;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups("user:read")]
+    protected ?\DateTimeImmutable $lastLogin = null;
 
-
-
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups("user:read")]
+    private ?string $gender = null;
 
     public function __construct(){
         // $this->isActive = false;
@@ -173,7 +215,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setRoles( array $roles): static {
 
-        $this->roles = $roles;
+        $this->roles = array_unique($roles);
         return $this;
     }
     public function getRoles(): array {
@@ -251,5 +293,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    public function getLastLogin(): ?\DateTimeImmutable
+    {
+        return $this->lastLogin;
+    }
+
+    public function setLastLogin(?\DateTimeImmutable $lastLogin): static
+    {
+        $this->lastLogin = $lastLogin;
+
+        return $this;
+    }
+
+    public function getGender(): ?string
+    {
+        return $this->gender;
+    }
+
+    public function setGender(?string $gender): static
+    {
+        $this->gender = $gender;
+
+        return $this;
+    }
+    
 
 }

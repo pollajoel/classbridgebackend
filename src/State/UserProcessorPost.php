@@ -6,12 +6,14 @@ namespace App\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Entity\User;
+use App\Entity\ParentEntity;
+use App\Entity\TeacherEntity;
+use App\Entity\StudentEntity;
 use App\Service\AccountValidationService;
 use App\Service\MailerService;
 use Exception;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use App\Entity\AccountValidation;
-use App\Message\UserKeycloakMessage;
 use App\Service\KeycloakService;
 use App\Service\UserService;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -34,13 +36,15 @@ final readonly class UserProcessorPost implements ProcessorInterface
     }
 
     /**
-     * @param User $data
+     * @param User | ParentEntity | TeacherEntity | StudentEntity  $data
      */
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): User
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []):mixed
     {
         if (!$data->getPlainPassword()) {
             return $this->processor->process($data, $operation, $uriVariables, $context);
         }
+
+        $this->userService->userRoleValidate($data);
         /**
          * Hash the password before persisting it in the database
          */

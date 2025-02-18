@@ -2,22 +2,62 @@
 declare(strict_types=1);
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\GetCollection;
-use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Put;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\GraphQl\DeleteMutation;
+use ApiPlatform\Metadata\GraphQl\Mutation;
+use ApiPlatform\Metadata\GraphQl\Query;
+use ApiPlatform\Metadata\GraphQl\QueryCollection;
+use ApiPlatform\Metadata\Put;
+use App\Controller\UserController;
+use App\State\UserProcessorPost;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Serializer\Annotation\Groups;
 
+#[ApiFilter(SearchFilter::class, properties:["discriminator" => "studentr"])]
 #[ApiResource(
+    security:"is_authenticated()",
+    normalizationContext: ['groups' => ['user:read']],
+    securityMessage: 'You are not authenticated',
+    //denormalizationContext: ['groups' => ['user', 'user:write']],
+    # Restfull api operations
     operations:[
-        new GetCollection(),
+        new GetCollection(
+            security: 'is_granted("ROLE_ADMIN")',
+        ),
+        new Post(
+            processor: UserProcessorPost::class,
+            security : 'is_granted("ROLE_ADMIN")',
+            securityMessage: 'Only admins can create new user.'
+        ),
+        new Put(
+            security: 'is_granted("ROLE_ADMIN", object) or is_granted("ROLE_TEACHER)',
+            securityMessage: 'You are not allow to to update user'
+        ),
+        new Patch(),
         new Get(),
-        new Post(),
-        new Put()
+        new Get(
+            read : false, #signifie que l'opération ne lira pas directement les données de la base de données ou de la ressource.
+            //output : false, #empêche API Platform de gérer automatiquement la sérialisation de la ressource, car nous souhaitons gérer la réponse avec notre propre logique.
+            security:'is_authenticated()',
+            controller: UserController::class,
+            status: Response::HTTP_OK
+        )
+    ],
+    graphQlOperations: [
+        new Query(),
+        new QueryCollection(),
+        new Mutation(name: 'create'),
+        new DeleteMutation(name: 'delete'),   
     ]
 )]
 #[ORM\Entity()]
@@ -27,12 +67,15 @@ class StudentEntity extends User {
     /**
      * @var Collection<int, ScoreEntity>
      */
+    #[Groups("user:read")]
     #[ORM\OneToMany(targetEntity: ScoreEntity::class, mappedBy: 'studentEntity')]
     private Collection $studentsScores;
 
+    #[Groups("user:read")]
     #[ORM\ManyToOne(inversedBy: 'folowStudents')]
     private ?ParentEntity $parentofStudent = null;
 
+    #[Groups("user:read")]
     #[ORM\ManyToOne(inversedBy: 'studentOfClass')]
     #[ORM\JoinColumn(nullable: true)]
     private ?ClassEntity $studentClassName = null;

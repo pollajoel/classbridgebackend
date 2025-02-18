@@ -6,6 +6,7 @@ api_platform:
       jsonld: ['application/ld+json']
       html: ['text/html']
       jsonopenapi: ['application/vnd.openapi+json']
+      multipart: ['multipart/form-data']
     swagger:
         api_keys:
             JWT:

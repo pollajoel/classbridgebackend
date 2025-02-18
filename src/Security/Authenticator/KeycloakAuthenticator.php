@@ -4,6 +4,7 @@
 namespace App\Security\Authenticator;
 
 use App\Repository\UserRepository;
+use App\Service\KeycloakService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,7 +17,10 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-
+use App\Security\User as UserKeyCloak;
+use App\Service\UserService;
+use DateTimeImmutable;
+use Elastica\Exception\NotFoundException;
 
 class KeycloakAuthenticator extends AbstractAuthenticator
 {
@@ -24,7 +28,8 @@ class KeycloakAuthenticator extends AbstractAuthenticator
 
     public function __construct(private readonly UserRepository $userRepository,
     private ParameterBagInterface $params,
-    private JWTTokenManagerInterface $jwtManager
+    private JWTTokenManagerInterface $jwtManager,
+    private readonly UserService $userService
     )
     {}
     /**
@@ -66,7 +71,19 @@ class KeycloakAuthenticator extends AbstractAuthenticator
         $roles = isset($data['realm_access']['roles']) ? $data['realm_access']['roles'] : [];
         $username = $data['preferred_username'];
         $email = $data['email'];
-        return new SelfValidatingPassport(new UserBadge($username, null, ["roles" => $roles, "email" => $email]));
+
+        $reposType = $this->userService->getRepositoryType($roles);
+        $userKeyCloak = new UserKeyCloak($username, $roles);
+        $data = $this->userService->getUserByType($userKeyCloak);
+
+        if (!$data) {
+            throw new NotFoundException(sprintf("%s with email '%s' does not exist", $reposType, $email));
+        }
+
+       $data->setLastLogin(new DateTimeImmutable());
+       $this->userService->saveUser($data);
+
+        return new SelfValidatingPassport(new UserBadge($username, null, ["roles" => $roles, "email" => $email, "data" => $data]));
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response

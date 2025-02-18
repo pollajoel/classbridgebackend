@@ -39,6 +39,7 @@ RUN apt-get update && apt-get install -y \
 RUN pecl install redis-5.3.7 \
    libsodium \
    && pecl install xdebug-3.2.1 \
+   && pecl install xdebug \
    && pecl install amqp && docker-php-ext-enable amqp\
    && docker-php-ext-enable redis xdebug
 

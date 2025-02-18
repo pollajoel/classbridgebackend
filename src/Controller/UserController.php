@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\ParentEntity;
+use App\Entity\User;
 use App\Service\AccountValidationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -12,12 +14,15 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Messenger\MessageBusInterface;
-use ApiPlatform\OpenApi\OpenApi;
-use App\Entity\User;
+use App\Security\User as UserKeyCloak;
 use App\Message\RoleMessage;
 use App\Service\KeycloakService;
 use App\Service\UserService;
+use Elastica\Exception\NotFoundException;
 use GuzzleHttp\Client;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class UserController extends AbstractController
 {
@@ -106,4 +111,26 @@ class UserController extends AbstractController
             "token" => $accessToken,
         ], 200);
     }
+
+    //#[IsGranted( new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_USER") or is_granted("ROLE_TEACHER ")') )]
+    #[IsGranted(new Expression('is_authenticated()') )]
+    #[Route("api/user/getMe",  name:"get_user_me", methods: ["GET"])]
+    public function __invoke(UserService $userService, Request $request):JsonResponse{
+
+       
+        /** @var UserKeyCloak $user */
+        $user         = $this->getUser();
+        $userData     = [];
+        if( $user ){
+         $reponse = $userService->getUserByType( $user );
+          return $this->json($reponse, Response::HTTP_OK);
+        }
+        return new JsonResponse($userData, Response::HTTP_OK);
+
+    }
+
+
+
+
+
 }

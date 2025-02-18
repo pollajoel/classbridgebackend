@@ -7,9 +7,13 @@ use ApiPlatform\Metadata\GetCollection;
 use App\Repository\AccountValidationRepository;
 use DateTime;
 use DateTimeImmutable;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #https://github.com/FriendsOfSymfony/FOSElasticaBundle/blob/master/doc/indexes.md
 #[ApiResource(
+    normalizationContext: ['groups' => ['user:read']],
+    securityMessage: 'You are not authenticated',
+    security:'is_authenticated()',
     operations:[
         new GetCollection(
             uriTemplate: '/accountvalidation/search',
@@ -22,19 +26,24 @@ use DateTimeImmutable;
 class AccountValidation {
     
     #[ORM\Id]
+    #[Groups("user:read")]
     #[ORM\GeneratedValue("IDENTITY")]
     #[ORM\Column(type: 'integer')]
     private int $id;
 
+    #[Groups("user:read")]
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $createdAt;
 
+    #[Groups("user:read")]
     #[ORM\Column(type: 'datetime', nullable: false)]
     private DateTime $expiredAt;
 
+    #[Groups("user:read")]
     #[ORM\Column(type: 'datetime_immutable',  nullable: true)]
     private ?DateTimeImmutable $activationDate;
 
+    #[Groups("user:read")]
     #[ORM\Column(type: 'string', length: 255, nullable:false)]  // S'assurer que la colonne est assez grande
     private string $code;
 

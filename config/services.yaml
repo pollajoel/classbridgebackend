@@ -31,6 +31,9 @@ services:
             $processor: '@api_platform.doctrine.orm.state.persist_processor'
     app.keycloak_provider:
         class: App\Security\User\KeycloakBearerUserProvider
+    App\Resolver\UserResolver:
+        tags:
+            - { name: api_platform.graphql.query_resolver }
     # # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones  
     # Déclarez votre authentificateur personnalisé

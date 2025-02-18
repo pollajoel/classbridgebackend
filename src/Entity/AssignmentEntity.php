@@ -21,7 +21,7 @@ use ApiPlatform\Metadata\ApiResource;
     ]
 )]
 
-class AssignmentEntity
+final class AssignmentEntity
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

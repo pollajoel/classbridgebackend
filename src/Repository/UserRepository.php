@@ -3,6 +3,7 @@ declare( strict_types=1);
 
 namespace App\Repository;
 
+use App\Entity\ParentEntity;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Entity\User;
@@ -56,4 +57,5 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
         $this->save($user, true);
     }
+
 }
