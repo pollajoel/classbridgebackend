@@ -11,10 +11,11 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 #[AsMessageHandler()]
 class RoleMessageHandler {
 
-    public function __construct(private UserService $userService,private KeycloakService $keycloakService) {}
+    public function __construct(private KeycloakService $keycloakService) {}
 
     public function __invoke(RoleMessage $message):void {
         // Process the role message...
         $this->keycloakService->assignRolesToAuser($message->getRoles(), $message->getUsername());
+        return;
     }
 }

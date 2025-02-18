@@ -13,11 +13,10 @@ class UserKeycloakMessageHandler
 {
 
     public function __construct(
-        private  KeycloakService $keycloakService,
         private LoggerInterface $loggerInterface
     ) {}
 
-    public function __invoke(UserKeycloakMessage $user)
+    public function __invoke(UserKeycloakMessage $user):void
     {
 
         $this->loggerInterface->error("hello world!");
@@ -31,5 +30,6 @@ class UserKeycloakMessageHandler
         // } catch (Exception $e) {
         //     $this->loggerInterface->error($e->getMessage());
         // }
+        return;
     }
 }
