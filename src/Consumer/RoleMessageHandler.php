@@ -13,7 +13,7 @@ class RoleMessageHandler {
 
     public function __construct(private readonly UserService $userService,private readonly KeycloakService $keycloakService) {}
 
-    public function __invoke(RoleMessage $message) {
+    public function __invoke(RoleMessage $message):void {
         // Process the role message...
         $this->keycloakService->assignRolesToAuser($message->getRoles(), $message->getUsername());
     }

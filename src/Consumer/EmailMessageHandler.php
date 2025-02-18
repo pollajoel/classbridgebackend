@@ -14,7 +14,7 @@ class EmailMessageHandler {
     
     public function __construct(private MailerInterface $mailer){}
 
-    public function __invoke(EmailMessage $email)
+    public function __invoke(EmailMessage $email):void
     {
        
         $email = (new TemplatedEmail())

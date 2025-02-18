@@ -99,7 +99,7 @@ class UserController extends AbstractController
 
 
     #[Route("hello", methods: ["GET"])]
-    public function index()
+    public function index():JsonResponse
     {
 
         $accessToken = "";
