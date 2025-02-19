@@ -4,15 +4,13 @@ namespace  App\Service;
 
 use App\Entity\AccountValidation;
 use App\Entity\User;
+use App\Service\Interface\AccountValidationServiceInterface;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use phpDocumentor\Reflection\Types\Boolean;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 
-class AccountValidationService
+class AccountValidationService implements AccountValidationServiceInterface
 {
 
     const VALIDATION_CODE_PREFIX = 'ValidationCode#__';
@@ -31,6 +29,7 @@ class AccountValidationService
          * @var AccountValidation $validation
          */
         $validation = $validationEntityManager->findOneBy(["code" => $validationCode]);
+        
         if (!$validation) {
             throw new Exception("Validation code not found");
         }

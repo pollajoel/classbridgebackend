@@ -9,7 +9,8 @@ use Psr\Log\LoggerInterface;
 use App\Service\KeycloakService;
 use App\Service\UserService;
 use PHPUnit\Framework\TestCase;
-
+use Doctrine\ORM\EntityManagerInterface;
+use App\Service\MailerService;
 abstract class BaseTestCase extends TestCase
 {
     protected $accountValidationServiceMock;
@@ -17,6 +18,8 @@ abstract class BaseTestCase extends TestCase
     protected $messageBusInterfaceMock;
     protected $keycloakServiceMock;
     protected $userServiceMock;
+    protected $entityManagerInterfaceMock;
+    protected $mailerServiceMock;
 
     protected function setUp(): void
     {
@@ -35,6 +38,12 @@ abstract class BaseTestCase extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
         $this->userServiceMock = $this->getMockBuilder(UserService::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->entityManagerInterfaceMock = $this->getMockBuilder(EntityManagerInterface::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->mailerServiceMock = $this->getMockBuilder(MailerService::class)
             ->disableOriginalConstructor()
             ->getMock();
     }

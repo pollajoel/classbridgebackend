@@ -37,7 +37,7 @@ class UserControllerWebTest extends WebTestCase
                 ->setId(1);
         
 
-        $userServiceMock = $userServiceMock = $this->createMock(UserService::class);
+        $userServiceMock = $this->createMock(UserService::class);
         $userServiceMock->method('getUserByType')->willReturn($user);
         // Remplacer le service réel par le mock dans le container Symfony
         $container->set(UserService::class, $userServiceMock);
