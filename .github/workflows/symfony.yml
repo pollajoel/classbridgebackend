@@ -7,11 +7,11 @@ name: Symfony
 
 on:
   push:
-    branches: [ '**' ]
+    branches: ["**"]
   pull_request:
     types:
       - closed # Lorsqu'on execute un merge request ou qu'on ferme une PR
-    branches: [ '**' ]
+    branches: ["**"]
 
 permissions:
   contents: read
@@ -22,26 +22,26 @@ jobs:
     runs-on: ubuntu-latest # L'environnement d'exécution est Ubuntu
 
     steps:
-    - uses: actions/checkout@v4 # Action pour installer composer
+      - uses: actions/checkout@v4 # Action pour installer composer
 
-    - name: Install dependencies
-      run: | 
-        composer install --prefer-dist --no-progress
-      continue-on-error: false
+      - name: Install dependencies
+        run: |
+          composer install --prefer-dist --no-progress
+        continue-on-error: false
 
-    - name: Run PHPUnit
-      run: |
-        XDEBUG_MODE=coverage  vendor/bin/phpunit 
-      continue-on-error: false
-  
-    - name: Run PHPStan
-      run: | 
-        vendor/bin/phpstan analyse --level 9 --no-progress
-      continue-on-error: false
-    
-    - name: Fail on error
-      run: |
-        if [ $? -ne 0 ]; then
-          echo "Tests failed. Blocking merge."
-          exit 1
-        fi
+      - name: Run PHPUnit
+        run: |
+          APP_ENV=test XDEBUG_MODE=coverage  vendor/bin/phpunit
+        continue-on-error: false
+
+      - name: Run PHPStan
+        run: |
+          vendor/bin/phpstan analyse --level 9 --no-progress
+        continue-on-error: false
+
+      - name: Fail on error
+        run: |
+          if [ $? -ne 0 ]; then
+            echo "Tests failed. Blocking merge."
+            exit 1
+          fi

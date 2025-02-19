@@ -23,7 +23,6 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Put;
 use App\Controller\UserController;
-use App\GraphQL\Type\UserUnionType;
 use App\Resolver\UserResolver;
 use App\State\UserProcessorPost;
 use Symfony\Component\HttpFoundation\Response;
@@ -66,7 +65,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Query(
             name:"getMe",
             read:false,
-            output : UserUnionType::class,
             resolver: UserResolver::class,
             security: 'is_authenticated()',
             args: [],
@@ -151,6 +149,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct(){
         // $this->isActive = false;
         $this->accountsValidations = new ArrayCollection();
+    }
+
+    public function setId(int $id): static
+    {
+        $this->id = $id;
+        return $this;
     }
     
     public function getId(): ?int

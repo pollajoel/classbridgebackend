@@ -108,7 +108,7 @@ class UserController extends AbstractController
     //#[IsGranted( new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_USER") or is_granted("ROLE_TEACHER ")') )]
     #[IsGranted(new Expression('is_authenticated()'))]
     #[Route("api/user/getMe",  name: "get_user_me", methods: ["GET"])]
-    public function __invoke(UserService $userService, Request $request): JsonResponse
+    public function __invoke(UserService $userService): JsonResponse
     {
 
 
@@ -119,6 +119,6 @@ class UserController extends AbstractController
             $reponse = $userService->getUserByType($user);
             return $this->json($reponse, Response::HTTP_OK);
         }
-        return new JsonResponse($userData, Response::HTTP_OK);
+        return new JsonResponse($userData, Response::HTTP_NOT_FOUND);
     }
 }

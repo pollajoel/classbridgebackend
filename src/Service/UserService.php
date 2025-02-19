@@ -15,10 +15,11 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use App\Security\User as UserKeyCloak;
+use App\Service\Interface\UserServiceInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Elastica\Exception\NotFoundException;
 
-class UserService
+
+class UserService implements UserServiceInterface
 {
 
     public function __construct(
@@ -80,7 +81,7 @@ class UserService
     }
 
 
-    public function addRolesToUser(array $roles, User $user)
+    public function addRolesToUser(array $roles, User $user):void
     {
         $this->keycloakService->assignRolesToAuser($roles, $user->getUsername());
     }
@@ -90,7 +91,7 @@ class UserService
      * @param User $user
      *
      */
-    public function createUserOnKeycloak(User $user)
+    public function createUserOnKeycloak(User $user):void
     {
         $message = new UserKeycloakMessage(
             $user->getUsername(),
@@ -105,7 +106,7 @@ class UserService
     }
 
 
-    public function userRoleCreateSyncKeycloak(array $roles, User $user)
+    public function userRoleCreateSyncKeycloak(array $roles, User $user):void
     {
         $userRoles = new RoleMessage($roles, $user->getUsername());
         $this->bus->dispatch($userRoles);

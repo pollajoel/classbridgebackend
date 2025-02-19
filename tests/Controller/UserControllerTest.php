@@ -2,46 +2,21 @@
 
 namespace App\Tests\Controller;
 
-use PHPUnit\Framework\TestCase;
 use App\Controller\UserController;
 use App\Entity\User;
-use App\Service\AccountValidationService;
-use Symfony\Component\Messenger\MessageBusInterface;
-use Psr\Log\LoggerInterface;
-use App\Service\KeycloakService;
-use App\Service\UserService;
+use App\Tests\BaseTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
 
 
-class UserControllerTest extends TestCase
+class UserControllerTest extends BaseTestCase
 {
-
+    
     /**
-     * @dataProvider dataProvider
+     * @dataProvider userValidationDataProvider
      */
     public function testValidateUserAccount(bool $valideToken, bool $userAccountIsActive): void
     {
-
-        $accountValidationServiceMock = $this
-            ->getMockBuilder(AccountValidationService::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $messageBusInterfaceMock = $this->getMockBuilder(MessageBusInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $loggerInterfaceMock     = $this->getMockBuilder(LoggerInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $keycloakServiceMock     = $this->getMockBuilder(KeycloakService::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $userServiceMock = $this->getMockBuilder(UserService::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-
         if ($valideToken) {
             $user = new User();
             if ($userAccountIsActive)
@@ -50,22 +25,22 @@ class UserControllerTest extends TestCase
                 $user->setIsActive(false);
             }
             $user->setRoles(["ROLE_ADMIN"]);
-            $accountValidationServiceMock
+            $this->accountValidationServiceMock
                 ->expects($this->once()) // la méthode doit être appelé une seule fois
                 ->method('validateAccount')
                 ->willReturn($user);
         } else {
-            $accountValidationServiceMock
+            $this->accountValidationServiceMock
                 ->expects($this->once()) // la méthode doit être appelé une seule fois
                 ->method('validateAccount')
                 ->willReturn(null);
         }
 
-        $userController  =  new UserController($accountValidationServiceMock, $messageBusInterfaceMock, $loggerInterfaceMock, $keycloakServiceMock);
+        $userController  =  new UserController($this->accountValidationServiceMock, $this->messageBusInterfaceMock, $this->loggerInterfaceMock, $this->keycloakServiceMock);
         /** 
          * @var Response $response
          */
-        $response = $userController->validateUserAccount($userServiceMock, "token");
+        $response = $userController->validateUserAccount($this->userServiceMock, "token");
         if( !$valideToken ){
             $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
             $this->assertEquals('code de validation invalide', $response->getContent());
@@ -80,7 +55,7 @@ class UserControllerTest extends TestCase
         }
         
     }
-    public static function dataProvider()
+    public static function userValidationDataProvider()
     {
         return [
             // valideToken, userAccountIsActive
@@ -89,4 +64,8 @@ class UserControllerTest extends TestCase
             [false, false],
         ];
     }
+
+
+
+
 }
