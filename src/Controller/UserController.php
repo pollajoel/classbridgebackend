@@ -17,11 +17,9 @@ use App\Security\User as UserKeyCloak;
 use App\Message\RoleMessage;
 use App\Service\KeycloakService;
 use App\Service\UserService;
-use Elastica\Exception\NotFoundException;
-use GuzzleHttp\Client;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\ExpressionLanguage\Expression;
-use Symfony\Component\Serializer\SerializerInterface;
+
 
 class UserController extends AbstractController
 {

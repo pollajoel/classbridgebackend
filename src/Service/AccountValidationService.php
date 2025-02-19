@@ -63,7 +63,7 @@ class AccountValidationService
         return bin2hex(random_bytes(16));  // Code plus court
     }
 
-    public function validateAccount(string $token): User
+    public function validateAccount(string $token): User | null
     {
 
         /**
